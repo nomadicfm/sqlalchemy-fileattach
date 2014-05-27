@@ -16,11 +16,17 @@ class Author(Base):
     __tablename__ = 'author'
 
 
+class AuthorFnGen(Base):
+    id = Column(Integer(), primary_key=True)
+    image = Column(FileType(file_name_generator=lambda n: 'abc123_%s' % n))
+    __tablename__ = 'author_fngen'
+
+
 class FileSystemStoreTestCase(TestCase):
 
     def setUp(self):
         tmp_dir = tempfile.mkdtemp(prefix=self.id())
-        self.store = FileSystemStore(tmp_dir, 'http://example.com/static/')
+        self.store = FileSystemStore(tmp_dir, 'http://example.com/static')
         self.session = get_session()
         set_default_store(self.store)
 
@@ -51,5 +57,26 @@ class FileSystemStoreTestCase(TestCase):
         self.session.flush()
         with open(test_files_path / 'small.txt', 'rb') as f:
             author.image.save(f.read())
-        with open(self.store.path('adam.png'), 'rb') as f:
+        with open(self.store.path('adam_1.png'), 'rb') as f:
+            self.assertEqual(f.read(), 'This is a small text file.\n\nSome Uniço∂e')
+
+    def test_delete_file_name_generated(self):
+        author = AuthorFnGen()
+        author.image = open(test_files_path / 'adam.png')
+        self.session.add(author)
+        self.session.flush()
+        self.assertTrue(os.path.exists(self.store.path('abc123_adam.png')))
+        author.image.delete()
+        self.assertEqual(author.image, None)
+        self.assertFalse(os.path.exists(self.store.path('abc123_adam.png')))
+
+    def test_save_file_name_generated(self):
+        author = AuthorFnGen()
+        author.image = open(test_files_path / 'adam.png')
+        self.session.add(author)
+        self.session.flush()
+        with open(test_files_path / 'small.txt', 'rb') as f:
+            author.image.save(f.read())
+        self.assertEqual(author.image.name, 'abc123_adam_1.png')
+        with open(self.store.path('abc123_adam_1.png'), 'rb') as f:
             self.assertEqual(f.read(), 'This is a small text file.\n\nSome Uniço∂e')

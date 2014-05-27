@@ -1,4 +1,5 @@
-
+import random
+import string
 
 _default_store = None
 def set_default_store(store):
@@ -41,3 +42,7 @@ class FileProxyMixin(object):
 
     def __iter__(self):
         return iter(self.file)
+
+
+def random_string(size, chars=string.ascii_lowercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))

@@ -1,9 +1,11 @@
 import os.path
+import os
 import shutil
 import errno
 from sqlalchemy_fileattach.exceptions import InvalidPathError
 
 from sqlalchemy_fileattach.stores.base import BaseStore
+from sqlalchemy_fileattach.utils import random_string
 
 
 class FileSystemStore(BaseStore):
@@ -13,7 +15,14 @@ class FileSystemStore(BaseStore):
         self.base_url = base_url.rstrip('/')
 
     def save(self, name, content):
+        name = self.get_available_name(name)
         path = self.path(name)
+        try:
+            os.makedirs(os.path.dirname(path))
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
         with open(path, 'wb') as dst:
             if hasattr(content, 'read'):
                 shutil.copyfileobj(content, dst)
@@ -43,3 +52,6 @@ class FileSystemStore(BaseStore):
         if not path.startswith(self.base_path):
             raise InvalidPathError('Path resolves to location outside of base_path')
         return path
+
+    def exists(self, name):
+        return os.path.exists(self.path(name))

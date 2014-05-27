@@ -5,6 +5,7 @@ from unittest.case import TestCase
 
 from sqlalchemy_fileattach.stores.fs import FileSystemStore
 from sqlalchemy_fileattach.utils import set_default_store
+from sqlalchemy_fileattach import utils
 from ..utils import test_files_path
 from tests.utils import get_session, rollback_session
 
@@ -49,3 +50,8 @@ class FileSystemStoreTestCase(TestCase):
     def test_url(self):
         self.assertEqual(self.store.url('new-file'), 'http://example.com/static/new-file')
         self.assertEqual(self.store.url('/new-file'), 'http://example.com/static/new-file')
+
+    def test_same_names(self):
+        name1 = self.store.save('my-file', content="Some content")
+        name2 = self.store.save('my-file', content="Some other")
+        self.assertNotEqual(name1, name2)

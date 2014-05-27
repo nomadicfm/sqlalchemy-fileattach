@@ -58,11 +58,7 @@ class FieldFile(FileProxyMixin):
         return self.store.size(self.name)
     size = property(_get_size)
 
-    # In addition to the standard File API, FieldFiles have extra methods
-    # to further manipulate the underlying file, as well as update the
-    # associated model instance.
-
-    def save(self, content, name=None, save=True):
+    def save(self, content, name=None):
         name = self.file_name_generator(name) if name else self.name
         self.name = self.store.save(name, content)
 
@@ -111,7 +107,12 @@ class FileType(TypeDecorator):
         # Get the value ready for the DB
 
         if isinstance(value, file):
-            name = self.store.save(os.path.basename(value.name), value)
+            name = value.name
+            if self.file_name_generator:
+                dir_name, file_name = os.path.split(name)
+                file_name = self.file_name_generator(file_name)
+                name = os.path.join(dir_name, file_name)
+            name = self.store.save(os.path.basename(name), value)
         else:
             name = value.name
         return name
