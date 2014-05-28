@@ -96,8 +96,9 @@ class FileType(TypeDecorator):
 
     values = None
 
-    def __init__(self, store=None, file_name_generator=None):
-        super(FileType, self).__init__()
+    def __init__(self, store=None, file_name_generator=None, **kwargs):
+        kwargs.setdefault('length', 250)
+        super(FileType, self).__init__(**kwargs)
         self._store = store
         self.file_name_generator = file_name_generator
 
