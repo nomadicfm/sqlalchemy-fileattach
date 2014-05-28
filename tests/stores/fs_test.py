@@ -1,25 +1,10 @@
 # coding=utf-8
-import tempfile
 import os.path
-from unittest.case import TestCase
 
-from sqlalchemy_fileattach.stores.fs import FileSystemStore
-from sqlalchemy_fileattach.utils import set_default_store
-from sqlalchemy_fileattach import utils
-from ..utils import test_files_path
-from tests.utils import get_session, rollback_session
+from ..utils import test_files_path, BaseTestCase
 
 
-class FileSystemStoreTestCase(TestCase):
-
-    def setUp(self):
-        tmp_dir = tempfile.mkdtemp(prefix=self.id())
-        self.store = FileSystemStore(tmp_dir, 'http://example.com/static/')
-        self.session = get_session()
-        set_default_store(self.store)
-
-    def tearDown(self):
-        rollback_session(self.session)
+class FileSystemStoreTestCase(BaseTestCase):
 
     def test_save_text(self):
         name = self.store.save('my-file', content='Some sample contënt')

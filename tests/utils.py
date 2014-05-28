@@ -1,3 +1,5 @@
+import tempfile
+from unittest import TestCase
 from path import path
 
 from sqlalchemy import create_engine, Column, Integer
@@ -5,7 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool, StaticPool
 from sqlalchemy_fileattach.stores.fs import FileSystemStore
-from sqlalchemy_fileattach.types import FileType
+from sqlalchemy_fileattach.utils import set_default_store
 
 test_files_path = path(__file__).dirname() / 'files'
 
@@ -14,6 +16,18 @@ ECHO_SQL = False
 
 Base = declarative_base()
 Session = sessionmaker()
+
+
+class BaseTestCase(TestCase):
+
+    def setUp(self):
+        tmp_dir = tempfile.mkdtemp(prefix=self.id())
+        self.store = FileSystemStore(tmp_dir, 'http://example.com/static')
+        self.session = get_session()
+        set_default_store(self.store)
+
+    def tearDown(self):
+        rollback_session(self.session)
 
 
 def get_session():
