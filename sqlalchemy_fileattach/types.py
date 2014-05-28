@@ -128,7 +128,7 @@ class FileType(TypeDecorator):
                 dir_name, file_name = os.path.split(name)
                 file_name = self.file_name_generator(file_name)
                 name = os.path.join(dir_name, file_name)
-            name = self.store.save(os.path.basename(name), value)
+            name = self.store.save(name, value)
         return name
 
     def process_result_value(self, value, dialect):
