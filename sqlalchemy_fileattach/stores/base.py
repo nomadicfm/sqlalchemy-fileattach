@@ -18,6 +18,9 @@ class BaseStore(object):
     def exists(self, name):
         raise NotImplementedError('exists() has to be implemented')
 
+    def size(self, name):
+        raise NotImplementedError('size() has to be implemented')
+
     def url(self, name):
         raise NotImplementedError('url() has to be implemented')
 

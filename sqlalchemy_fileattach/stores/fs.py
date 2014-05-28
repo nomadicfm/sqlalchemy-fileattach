@@ -43,6 +43,9 @@ class FileSystemStore(BaseStore):
             if e.errno != errno.ENOENT:
                 raise
 
+    def size(self, name):
+        return os.path.getsize(self.path(name))
+
     def url(self, name):
         return '%s/%s' % (self.base_url, name.lstrip('/'))
 

@@ -1,15 +1,18 @@
 import os.path
 
 from sqlalchemy import TypeDecorator, Unicode
-from sqlalchemy_fileattach.exceptions import NoStoreError, InvalidFieldValue
+from sqlalchemy_fileattach.exceptions import NoStoreError, InvalidFieldValue, NoFileNameError
 from sqlalchemy_fileattach.utils import FileProxyMixin, get_default_store
 
 
 class FieldFile(FileProxyMixin):
-    def __init__(self, name, store, file_name_generator):
+    def __init__(self, name, store, file_name_generator=None):
         self.name = name
         self.store = store
         self.file_name_generator = file_name_generator or (lambda x: x)
+
+    def __nonzero__(self):
+        return bool(self.name)
 
     def __eq__(self, other):
         if hasattr(other, 'name'):
@@ -25,12 +28,16 @@ class FieldFile(FileProxyMixin):
 
     def _require_file(self):
         if not self.name:
-            raise ValueError("The '%s' attribute has no file associated with it." % self.field.name)
+            raise NoFileNameError("No file name found for file column, but a file name is needed for this operation")
+
+    @property
+    def has_file_handle(self):
+        return hasattr(self, '_file') and self._file is not None
 
     def _get_file(self):
         self._require_file()
-        if not hasattr(self, '_file') or self._file is None:
-            self._file = self.store.open(self.name, 'rb')
+        if not self.has_file_handle:
+            self._file = self.store.open(self.name)
         return self._file
 
     def _set_file(self, file):
@@ -53,23 +60,20 @@ class FieldFile(FileProxyMixin):
 
     def _get_size(self):
         self._require_file()
-        if not self._committed:
-            return self.file.size
         return self.store.size(self.name)
     size = property(_get_size)
 
     def save(self, content, name=None):
         name = self.file_name_generator(name) if name else self.name
         self.name = self.store.save(name, content)
+        if self.has_file_handle:
+            del self.file
 
     def delete(self, save=True):
         if not self:
             return
-        # Only close the file if it's already open, which we know by the
-        # presence of self._file
-        if hasattr(self, '_file'):
+        if self.has_file_handle:
             self.close()
-            del self.file
 
         self.store.delete(self.name)
 
@@ -84,6 +88,7 @@ class FieldFile(FileProxyMixin):
         file = getattr(self, '_file', None)
         if file is not None:
             file.close()
+            del self.file
 
 
 class FileType(TypeDecorator):
