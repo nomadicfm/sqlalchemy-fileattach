@@ -16,6 +16,8 @@ try:
 except ImportError:
     raise Exception("Boto could not be imported. You must install 'boto' to use S3BotoStore")
 
+# The contents of this file are entirely ported from Django Storages.
+
 GZIP_CONTENT_TYPES = ('text/css', 'application/javascript', 'application/x-javascript')
 
 def safe_join(base, *paths):
