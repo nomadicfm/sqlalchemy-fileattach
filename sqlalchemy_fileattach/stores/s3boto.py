@@ -1,6 +1,6 @@
 import calendar
 from datetime import datetime, time
-from io import StringIO
+from StringIO import StringIO
 import mimetypes
 import os
 import re
@@ -9,7 +9,7 @@ from boto.s3.connection import SubdomainCallingFormat, S3Connection
 from boto.s3.key import Key
 from sqlalchemy_fileattach.exceptions import ImproperlyConfigured, SuspiciousOperation
 from sqlalchemy_fileattach.stores.base import BaseStore
-from sqlalchemy_fileattach.utils import File
+from sqlalchemy_fileattach.utils import File, FileProxyMixin
 
 try:
     import boto
@@ -233,7 +233,17 @@ class S3BotoStore(BaseStore):
         return f
 
     def save(self, name, content):
+        if isinstance(content, (str, unicode)):
+            # Support saving of string values
+            content = StringIO(content)
+        elif isinstance(content, file):
+            # file objects don't support setting the 'name'
+            # property. So wrap it in a FileProxyMixin
+            f = FileProxyMixin()
+            f.file = content
+            content = f
         cleaned_name = self._clean_name(name)
+        cleaned_name = self.get_available_name(cleaned_name)
         name = self._normalize_name(cleaned_name)
         headers = self.headers.copy()
         content_type = getattr(content, 'content_type',

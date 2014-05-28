@@ -21,13 +21,25 @@ Session = sessionmaker()
 class BaseTestCase(TestCase):
 
     def setUp(self):
-        tmp_dir = tempfile.mkdtemp(prefix=self.id())
-        self.store = FileSystemStore(tmp_dir, 'http://example.com/static')
         self.session = get_session()
+        if hasattr(self, '_store'):
+            del self._store
         set_default_store(self.store)
 
     def tearDown(self):
         rollback_session(self.session)
+
+    @property
+    def store(self):
+        if hasattr(self, '_store'):
+            return self._store
+
+        self._store = self.make_store()
+        return self._store
+
+    def make_store(self):
+        tmp_dir = tempfile.mkdtemp(prefix=self.id())
+        return FileSystemStore(tmp_dir, 'http://example.com/static')
 
 
 def get_session():

@@ -34,7 +34,6 @@ class FileSystemStoreTestCase(BaseTestCase):
 
     def test_url(self):
         self.assertEqual(self.store.url('new-file'), 'http://example.com/static/new-file')
-        self.assertEqual(self.store.url('/new-file'), 'http://example.com/static/new-file')
 
     def test_same_names(self):
         name1 = self.store.save('my-file', content="Some content")
