@@ -111,16 +111,24 @@ class FileType(TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         # Get the value ready for the DB
+        if hasattr(value, 'file'):
+            # May be a cgi.FieldStorage instance
+            f = FileProxyMixin()
+            f.file = value.file
+            f.name = value.filename
+            value = f
 
-        if isinstance(value, file):
+        if isinstance(value, FieldFile):
+            # It is a FieldFile, so just get the name
+            name = value.name
+        else:
+            # Assume it is a file-like object
             name = value.name
             if self.file_name_generator:
                 dir_name, file_name = os.path.split(name)
                 file_name = self.file_name_generator(file_name)
                 name = os.path.join(dir_name, file_name)
             name = self.store.save(os.path.basename(name), value)
-        else:
-            name = value.name
         return name
 
     def process_result_value(self, value, dialect):
