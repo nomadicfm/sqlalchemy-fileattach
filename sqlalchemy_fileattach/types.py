@@ -123,7 +123,7 @@ class FileType(TypeDecorator):
             name = value.name
         else:
             # Assume it is a file-like object
-            name = value.name
+            name = os.path.basename(value.name)
             if self.file_name_generator:
                 dir_name, file_name = os.path.split(name)
                 file_name = self.file_name_generator(file_name)
