@@ -10,7 +10,8 @@ from sqlalchemy_fileattach.utils import random_string
 
 class FileSystemStore(BaseStore):
 
-    def __init__(self, base_path, base_url):
+    def __init__(self, base_path, base_url, **kwargs):
+        super(FileSystemStore, self).__init__(**kwargs)
         self.base_path = base_path.rstrip('/')
         self.base_url = base_url.rstrip('/')
 

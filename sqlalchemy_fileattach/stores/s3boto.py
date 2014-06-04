@@ -112,7 +112,9 @@ class S3BotoStore(BaseStore):
             preload_metadata=False,
             calling_format=SubdomainCallingFormat(),
             auto_create_bucket=False,
-            file_overwrite=False):
+            file_overwrite=False,
+            **kwargs):
+        super(S3BotoStore, self).__init__(**kwargs)
         self.bucket_acl = bucket_acl
         self.bucket_name = bucket
         self.acl = acl

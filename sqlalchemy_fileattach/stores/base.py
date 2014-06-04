@@ -6,6 +6,9 @@ __all__ = 'BaseStore',
 
 class BaseStore(object):
 
+    def __init__(self, **kwargs):
+        pass
+
     def save(self, name, content):
         raise NotImplementedError('save() has to be implemented')
 
