@@ -2,7 +2,7 @@ from .fs import FileSystemStore
 from .s3boto import S3BotoStore
 
 
-def store_from_config(config, prefix='', backend=None, **kwargs):
+def store_from_config(config, prefix='', backend=None, **backend_kwargs):
 
     def get_key(k):
         return '.'.join(filter(bool, [prefix, k]))
@@ -22,5 +22,6 @@ def store_from_config(config, prefix='', backend=None, **kwargs):
     # Now get the args to pass to the backend
     search_for = (get_key(backend) + '.') if prefix else ''
     kwargs = dict([(k.replace(search_for, ''), v) for k, v in config.items() if k.startswith(search_for)])
+    kwargs.update(backend_kwargs)
 
     return backend_class(**kwargs)
