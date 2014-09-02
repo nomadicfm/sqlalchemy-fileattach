@@ -118,7 +118,7 @@ class FileType(TypeDecorator):
             f.name = value.filename
             value = f
 
-        if value is None:
+        if not value:
             return None
         elif isinstance(value, FieldFile):
             # It is a FieldFile, so just get the name
