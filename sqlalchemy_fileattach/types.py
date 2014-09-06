@@ -115,7 +115,7 @@ class FileType(TypeDecorator):
             # May be a cgi.FieldStorage instance
             f = FileProxyMixin()
             f.file = value.file
-            f.name = value.name
+            f.name = getattr(value, 'filename', value.name)
             value = f
 
         if not value:
