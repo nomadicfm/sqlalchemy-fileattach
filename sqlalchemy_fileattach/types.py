@@ -11,7 +11,10 @@ class FieldFile(FileProxyMixin):
         self.store = store
         self.file_name_generator = file_name_generator or (lambda x: x)
 
-    def __nonzero__(self):
+    def __bool__(self):
+        return bool(self.name)
+
+    def __nonzero__(self):      # Python 2 compatibility
         return bool(self.name)
 
     def __eq__(self, other):

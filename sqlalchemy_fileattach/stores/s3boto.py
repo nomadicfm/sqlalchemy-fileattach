@@ -1,6 +1,7 @@
 import calendar
 from datetime import datetime, time
-from StringIO import StringIO
+import six
+from six import StringIO
 import mimetypes
 import os
 import re
@@ -33,7 +34,7 @@ def safe_join(base, *paths):
     Paths outside the base path indicate a possible security
     sensitive operation.
     """
-    from urlparse import urljoin
+    from six.moves.urllib.parse import urljoin
     # TODO: Consider importing Django's force_unicode function if necessary
     # base_path = force_unicode(base)
     base_path = base
@@ -237,7 +238,7 @@ class S3BotoStore(BaseStore):
         return f
 
     def save(self, name, content):
-        if isinstance(content, (str, unicode)):
+        if isinstance(content, six.string_types):
             # Support saving of string values
             content = StringIO(content)
         elif isinstance(content, file):
