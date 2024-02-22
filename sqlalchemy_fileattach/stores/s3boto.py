@@ -6,7 +6,7 @@ import mimetypes
 import os
 import re
 from boto.exception import S3ResponseError
-from boto.s3.connection import SubdomainCallingFormat, S3Connection
+from boto.s3.connection import SubdomainCallingFormat, S3Connection, NoHostProvided
 from boto.s3.key import Key
 from sqlalchemy_fileattach.exceptions import ImproperlyConfigured, SuspiciousOperation
 from sqlalchemy_fileattach.stores.base import BaseStore
@@ -114,6 +114,7 @@ class S3BotoStore(BaseStore):
             calling_format=SubdomainCallingFormat(),
             auto_create_bucket=False,
             file_overwrite=False,
+            host=None,
             **kwargs):
         super(S3BotoStore, self).__init__(**kwargs)
         self.bucket_acl = bucket_acl
@@ -137,8 +138,11 @@ class S3BotoStore(BaseStore):
         if not access_key and not secret_key:
             access_key, secret_key = self._get_access_keys()
 
+        if not host:
+            host = NoHostProvided
+
         self.connection = S3Connection(access_key, secret_key,
-            calling_format=calling_format)
+            calling_format=calling_format, host=host)
         self._entries = {}
 
     @property
